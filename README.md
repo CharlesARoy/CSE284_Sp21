@@ -11,4 +11,4 @@ The goal of this project is to test a variety of tools and tool parameters to op
 #### Methods
 
 
-![alt text](https://github.com/CharlesARoy/CSE284_Sp21/blob/main/flowchart.png?raw=true)
+![alt text](https://github.com/CharlesARoy/CSE284_Sp21/blob/main/Flowchart.png?raw=true)
