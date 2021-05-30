@@ -1,0 +1,132 @@
+truthset, = glob_wildcards("/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover.vcf")
+print(truthset)
+
+rule all:
+	input:
+		expand("/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR_INS_pad100.bed", truth = truthset)
+
+rule remove_SVs_less_50bp:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover.vcf"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp.vcf"
+	shell:
+		"bcftools view -i 'INFO/SVLEN<-50 || INFO/SVLEN>50' {input} > {output}"
+
+rule remove_SVs_more_than_10mb:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp.vcf"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb.vcf"
+	shell:
+		"bcftools view -i 'INFO/SVLEN>=-10000000 && INFO/SVLEN<=10000000' {input} > {output}"
+
+rule sort_vcf:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb.vcf"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf"
+	shell:
+		"bcftools sort -O v {input} > {output}"
+
+rule zip_vcf:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf.gz"
+	shell:
+		"bgzip {input}"
+
+rule index_zipped_vcf:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf.gz"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf.gz.tbi"
+	shell:
+		"tabix {input}"
+
+rule retain_chr21_svs_only:
+	input:
+		zipped="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf.gz",
+		to_ensure_rule_order="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort.vcf.gz.tbi"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21.vcf"
+	shell:
+		"bcftools view -r chr21 {input.zipped} > {output}"
+
+rule subset_vcf:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21.vcf"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21.bed"
+	shell:
+		"bcftools query -f '[%CHROM]\t[%POS]\t[%INFO/END]\t[%INFO/SVLEN]\t[%INFO/SVTYPE]\t[%GT]\n' {input} > {output}"
+
+rule obtain_STR_SVs:
+	input:
+		data="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21.bed",
+		STR="/home/croy/teams/CSE284_SP21_A00/team15/data/table-browser_simple-repeats.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR.bed"
+	shell:
+		"bedtools intersect -f 0.5 -wa -wb -a {input.data} -b {input.STR} | cut -f 1-5 | uniq -c | cut -c 9- > {output}"
+
+rule obtain_STR_DELs:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR_DEL.bed"
+	shell:
+		"grep DEL {input} > {output}"
+
+rule obtain_STR_INSs:
+	input:
+		data="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR.bed",
+		to_ensure_rule_order="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR_DEL.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR_INS.bed"
+	shell:
+		"grep INS {input.data} > {output}"
+
+rule pad_STR_INS_coordinates:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR_INS.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR_INS_pad100.bed"
+	shell:
+		"""awk 'BEGIN {{OFS="\\t"}}; {{if($3-$2<100) printf "%s\\t%.0f\\t%.0f\\t%s\\t%s\\n", $1, $2-(100-($3-$2))/2, $3+(100-($3-$2))/2, $4, $5; else print $0}}' {input} > {output}"""
+
+rule obtain_non_STR_SVs:
+	input:
+		data="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21.bed",
+		STR="/home/croy/teams/CSE284_SP21_A00/team15/data/short-tandem-repeats_simple-repeats_repeat-masker-simple-repeats_cat_sort_merge.bed",
+		to_ensure_rule_order="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_STR_INS_pad100.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR.bed"
+	shell:
+		"bedtools intersect -v -f 0.5 -wa -wb -a {input.data} -b {input.STR} | cut -f 1-5 | uniq -c | cut -c 9- > {output}"
+
+rule obtain_non_STR_DELs:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR_DEL.bed"
+	shell:
+		"grep DEL {input} > {output}"
+
+rule obtain_non_STR_INSs:
+	input:
+		data="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR.bed",
+		to_ensure_rule_order="/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR_DEL.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR_INS.bed"
+	shell:
+		"grep INS {input.data} > {output}"
+
+rule pad_non_STR_INS_coordinates:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR_INS.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/{truth}_hg38-liftover_rm-50bp_rm-10mb_sort_index_chr21_non-STR_INS_pad100.bed"
+	shell:
+		"""awk 'BEGIN {{OFS="\\t"}}; {{if($3-$2<100) printf "%s\\t%.0f\\t%.0f\\t%s\\t%s\\n", $1, $2-(100-($3-$2))/2, $3+(100-($3-$2))/2, $4, $5; else print $0}}' {input} > {output}"""

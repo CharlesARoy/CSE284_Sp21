@@ -1,0 +1,15 @@
+aligners, = glob_wildcards("/home/croy/teams/CSE284_SP21_A00/team15/data/hg002_ont_chr21_{aligner}_DEL.bed")
+print(aligners)
+
+rule all:
+	input:
+		expand("/home/croy/teams/CSE284_SP21_A00/team15/data/hg002_ont_chr21_{aligner}_DEL_support2.bed", aligner = aligners)
+
+rule obtain_read_support_two:
+	input:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/hg002_ont_chr21_{aligner}_DEL.bed"
+	output:
+		"/home/croy/teams/CSE284_SP21_A00/team15/data/hg002_ont_chr21_{aligner}_DEL_support2.bed"
+	shell:
+		"""awk 'BEGIN{{FS="\\t"; OFS="\\t"}}; {{if ($6 > 1) print $0}}' {input} > {output}"""
+
