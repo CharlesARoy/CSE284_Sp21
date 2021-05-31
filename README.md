@@ -104,17 +104,24 @@ bedtools intersect -f 0.5 -r -wa -wb -a sv_calls.bed -b truthset.bed
 
 ### Results
 
+The primary metrics used to assess performance were sensitivity and false discovery rate (FDR). Consistent with expectations, across all combinations of aligner and SV caller, relative to non-repetitive regions, in STR regions the sensitivity was found to be 8% lower and the FDR was found to be 15% higher. Sensitivity and FDR were both slightly better for deletions compared to insertions. It was also found that when calls were required to have two or more supporting reads, sensitivity dropped by 4% and FDR decreased by 35% in non-repetitive regions and 9% in STR regions.
 
+As indicated in **Table 1**, for both deletions and insertions it was found that Winnowmap had the highest sensitivity and NGMLR had the lowest FDR. Among SV callers, it was found that SVIM typically had the highest sensitivity and the highest FDR. For deletions and insertions, the highest sensitivity was achieved with Winnowmap and SVIM. For deletions the lowest FDR was achieved with NGMLR and NanoVar and for insertions it was achieved with NGMLR and Sniffles.
 
+**Table 1.** Sensitivity and False Discovery Rate of Various Aligners and SV Callers
+|                            | Minimap2 v2.18 | Minimap2 v2.20 | NGM-LR | Winnowmap |
+|----------------------------|:--------------:|:--------------:|:------:|:---------:|
+|  NanoVar; DEL; Sensitivity |      0.25      |      0.25      |  0.30  |    0.25   |
+| Sniffles; DEL; Sensitivity |      0.33      |      0.34      |  0.30  |    0.36   |
+|   SVIM; DEL; Sensitivity   |      0.40      |      0.41      |  0.38  |    0.44   |
+|      NanoVar; DEL; FDR     |      0.42      |      0.44      |  0.35  |    0.42   |
+|     Sniffles; DEL; FDR     |      0.56      |      0.56      |  0.40  |    0.54   |
+|       SVIM; DEL; FDR       |      0.73      |      0.67      |  0.46  |    0.62   |
+|  NanoVar; INS; Sensitivity |      0.29      |      0.30      |  0.37  |    0.26   |
+| Sniffles; INS; Sensitivity |      0.35      |      0.35      |  0.32  |    0.33   |
+|   SVIM; INS; Sensitivity   |      0.52      |      0.52      |  0.45  |    0.56   |
+|      NanoVar; INS; FDR     |      0.70      |      0.69      |  0.61  |    0.73   |
+|     Sniffles; INS; FDR     |      0.66      |      0.65      |  0.50  |    0.62   |
+|       SVIM; INS; FDR       |      0.70      |      0.68      |  0.61  |    0.71   |
 
-|                 | Minimap2 v2.18 | Minimap2 v2.20 | NGM-LR | Winnowmap |
-|-----------------|:--------------:|:--------------:|:------:|:---------:|
-| Sniffles; Sens. |      0.33      |      0.34      |  0.30  |    0.36   |
-|   SVIM; Sens.   |      0.40      |      0.41      |  0.38  |    0.44   |
-|   NanoVar; FDR  |      0.42      |      0.44      |  0.35  |    0.42   |
-|  Sniffles; FDR  |      0.56      |      0.56      |  0.40  |    0.54   |
-|    SVIM; FDR    |      0.73      |      0.67      |  0.46  |    0.62   |
-|  NanoVar; Sens. |      0.29      |      0.30      |  0.37  |    0.26   |
-| Sniffles; Sens. |      0.35      |      0.35      |  0.32  |    0.33   |
-|   SVIM; Sens.   |      0.52      |      0.52      |  0.45  |    0.56   |
-|   NanoVar; FDR  |      0.70      |      0.69      |  0.61  |    0.73   |
+Comparisons are restricted to calls with read support of two or greater that intersect with simple tandem repeats.
