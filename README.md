@@ -11,6 +11,46 @@ The goal of this project is to test a variety of tools and tool parameters to op
 
 #### Methods
 
+The data used in this project was Ultra-long GridION data sequenced by Genome in a Bottle (GIAB). The raw fast5 files were obtained from [this Amazon bucket](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=) but are no longer hosted there. Currently, fastq files can be obtained from the human pangenomics Amazon bucket found [here](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=NHGRI_UCSC_panel/HG002/hpp_HG002_NA24385_son_v1/nanopore/).
+
+The raw fast5 data was basecalled with Guppy version 4.0.11 using the following command: <br>
+```bash
+guppy_basecaller --recursive --input_path /path/to/fast5/files --save_path /output/path --config dna_r9.4.1_450bps_hac.cfg --verbose_logs --device "cuda:all"
+```
+
+After basecalling the data, it was mapped to the HG38 human reference genome with Minimap2 and then sorted, indexed, and downsampled with samtools. The data was downsampled from 50X coverage to 10X coverage to speed up testing and to better approximate sample coverage that might be more realistic in clinical testing. The downsampled data was then converted back to fastq format so that the reads could be aligned with other aligners. 
+```bash
+# Align
+minimap2 -x map-ont -t 10 -a --MD -Y reference_file.fasta unmapped_reads.fastq -o aligned_reads.bam
+
+# Sort and Index
+samtools sort aligned_reads.bam -o aligned_reads_sorted.bam
+samtools index aligned_reads_sorted.bam
+
+# Downsample data
+samtools view -s 0.2 --threads 2 -b aligned_reads_sorted.bam > aligned_reads_sorted_downsampled.bam
+
+# Convert downsampled bam back to fastq
+samtools fastq aligned_reads_sorted_downsampled.bam > unmapped_reads_downsampled.fastq
+```
+
+Following this, the data was aligned with multiple tools. Minimap2 was used because it is currently the most popular long read aligner and is recommended by both Nanopore and PacBio scientists. [Minimap2 v2.20 was released during this project](https://github.com/lh3/minimap2/blob/master/NEWS.md) and is supposed to produce better alignment in highly repetitive regions, so it was tested in addition to version 2.18. [Winnowmap](https://github.com/marbl/Winnowmap) was used because it is optimized for mapping ONT and PacBio reads to repetitive reference sequences. Finally, because Winnowmap is an extension of Minimap2, [NGMLR](https://github.com/philres/ngmlr) was used as an alternative.
+
+The alignments were performed with the following commands:
+```bash
+# Minimap2 v2.18 and 2.20
+minimap2 -x map-ont -t 10 -a --MD -Y reference_file.fasta unmapped_reads.fastq -o aligned_reads.bam
+
+# NGMLR
+ngmlr -x ont -t 10 -r reference_file.fasta -q unmapped_reads.fastq -o aligned_reads.sam
+
+# Winnowmap
+winnowmap -x map-ont --MD -Y -a reference_file.fasta unmapped_reads.fastq -o aligned_reads.sam
+```
+
+
+
+
 
 ![alt text](https://github.com/CharlesARoy/CSE284_Sp21/blob/main/Flowchart.jpeg?raw=true)
 
