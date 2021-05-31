@@ -16,7 +16,7 @@ The goal of this project is to test a variety of tools and tool parameters to op
 
 The human reference genome used in this project was obtained from the BROAD GATK Resource Bundle which is hosted [here](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0) (Homo_sapiens_assembly38.fasta).
 
-The data used in this project was ultra-long GridION Nanopore data from HG002 (NA24385) that was sequenced by Genome in a Bottle (GIAB). The raw fast5 files were obtained from [this Amazon bucket](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=) but are no longer hosted there. Fastq files base called with an older version of Guppy than used in this project can be obtained from the human pangenomics Amazon bucket found [here](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=NHGRI_UCSC_panel/HG002/hpp_HG002_NA24385_son_v1/nanopore/).
+The data used in this project was ultra-long GridION Nanopore data from HG002 (NA24385) that was sequenced by [Genome in a Bottle (GIAB)](https://www.nist.gov/programs-projects/genome-bottle). The raw fast5 files were obtained from [this Amazon bucket](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=) but are no longer hosted there. Fastq files base called with an older version of Guppy than used in this project can be obtained from the [Human Pangenomics HG002 data freeze](https://github.com/human-pangenomics/HG002_Data_Freeze_v1.0) (data stored [here](https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=NHGRI_UCSC_panel/HG002/hpp_HG002_NA24385_son_v1/nanopore/)).
 
 The truth set for HG002 (NA was obtained with the following command and was then lifted over to hg38:
 ```bash
