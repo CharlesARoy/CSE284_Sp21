@@ -15,3 +15,16 @@ The goal of this project is to test a variety of tools and tool parameters to op
 
 
 #### Results
+
+
+|                 | Minimap2 v2.18 | Minimap2 v2.20 | NGM-LR | Winnowmap |
+|-----------------|:--------------:|:--------------:|:------:|:---------:|
+| Sniffles; Sens. |      0.33      |      0.34      |  0.30  |    0.36   |
+|   SVIM; Sens.   |      0.40      |      0.41      |  0.38  |    0.44   |
+|   NanoVar; FDR  |      0.42      |      0.44      |  0.35  |    0.42   |
+|  Sniffles; FDR  |      0.56      |      0.56      |  0.40  |    0.54   |
+|    SVIM; FDR    |      0.73      |      0.67      |  0.46  |    0.62   |
+|  NanoVar; Sens. |      0.29      |      0.30      |  0.37  |    0.26   |
+| Sniffles; Sens. |      0.35      |      0.35      |  0.32  |    0.33   |
+|   SVIM; Sens.   |      0.52      |      0.52      |  0.45  |    0.56   |
+|   NanoVar; FDR  |      0.70      |      0.69      |  0.61  |    0.73   |
