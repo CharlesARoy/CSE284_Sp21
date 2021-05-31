@@ -2,7 +2,8 @@
 
 ## Investigating Structural Variant Detection in Simple Tandem Repeat Regions Using HG002 (NA24385) Nanopore Data
 
-The goal of this project is to test a variety of tools and tool parameters to optimize structural variant (SV) detection in simple tandem repeat (STR) regions of the human genome using Nanopore (ONT) data. As seen in the following image, this problem arises from the fact that even state-of-the-art aligners, such as Minimap2, can introduce gaps and insertions somewhat randomly in repetitive regions, making it challenging for SV detection algorithms to properly aggregate supporting reads when calling SVs. 
+The goal of this project is to test a variety of tools and tool parameters to optimize structural variant (SV) detection in simple tandem repeat (STR) regions of the human genome using Nanopore (ONT) data. As seen in the following image, this problem arises from the fact that even state-of-the-art aligners, such as Minimap2, often introduce gaps and insertions somewhat randomly in repetitive regions. Poorly localized indels in reads can reduce the accuracy of SV calls and generally makes genotyping more challenging. In trio data this issue can also result in inflated estimates of _de novo_ mutation (e.g. when SVs are called in children but are missed in parents). 
+
 
 
 ![alt text](https://github.com/CharlesARoy/CSE284_Sp21/blob/main/misaligned_deletions.jpg?raw=true)
